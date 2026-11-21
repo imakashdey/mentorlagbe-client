@@ -1,26 +1,75 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------
+   MentorLagbe design system
+   Dark #0A0E09 · Pink #FBE4E3 · Lime #ECFAB5 · Lavender #ECEEFE
+   Sky #D9F0FF · Green #96EE60 (CTA/active) · Mint #7FD09F (badges/success)
+---------------------------------------------------------------- */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0a0e09;
+  --muted: rgba(10, 14, 9, 0.6);
+
+  --ml-dark: #0a0e09;
+  --ml-pink: #fbe4e3;
+  --ml-lime: #ecfab5;
+  --ml-lavender: #eceefe;
+  --ml-sky: #d9f0ff;
+  --ml-green: #96ee60;
+  --ml-mint: #7fd09f;
 }
 
+/* Tailwind v4 tokens: usable as bg-ml-pink, text-ml-dark, border-ml-green ... */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+
+  --color-ml-dark: var(--ml-dark);
+  --color-ml-pink: var(--ml-pink);
+  --color-ml-lime: var(--ml-lime);
+  --color-ml-lavender: var(--ml-lavender);
+  --color-ml-sky: var(--ml-sky);
+  --color-ml-green: var(--ml-green);
+  --color-ml-mint: var(--ml-mint);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+a {
+  transition: all 0.2s ease;
+}
+
+/* Keyboard focus: visible green ring */
+:focus-visible {
+  outline: 2px solid var(--ml-green);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--ml-green);
+  color: var(--ml-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  button,
+  a {
+    transition: none;
+  }
 }
