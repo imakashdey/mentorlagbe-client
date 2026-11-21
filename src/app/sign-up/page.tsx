@@ -66,8 +66,7 @@ export default function SignUpPage() {
   };
 
   const inputCls = (field: string) =>
-    `w-full rounded-2xl border bg-white px-4 py-3.5 text-sm font-semibold text-[#0A0E09] outline-none transition placeholder:font-medium placeholder:text-[#0A0E09]/40 focus:border-[#0A0E09] ${
-      errors[field] ? "border-red-500" : "border-[#0A0E09]/15"
+    `w-full rounded-2xl border bg-white px-4 py-3.5 text-sm font-semibold text-[#0A0E09] outline-none transition placeholder:font-medium placeholder:text-[#0A0E09]/40 focus:border-[#0A0E09] ${errors[field] ? "border-red-500" : "border-[#0A0E09]/15"
     }`;
 
   return (

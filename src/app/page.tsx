@@ -58,9 +58,9 @@ export default function HomePage() {
 
         <div className="relative mx-auto max-w-4xl text-center">
           <h1 className="text-5xl font-black leading-[1.1] tracking-tight text-[#0A0E09] sm:text-6xl lg:text-7xl">
-            Find your ideal
+            Find Your Ideal
             <br />
-            tutor today
+            <span className="text-[#96EE60]">TUTOR</span> Today
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base text-[#0A0E09]/70 md:text-lg">
             Online or offline, choose verified tutors by subject, class level and
@@ -185,37 +185,37 @@ export default function HomePage() {
       {/* Testimonials: lavender */}
       <Testimonials />
 
-    {/* Become a tutor: full image, fully responsive */}
-<section className="bg-white px-4 py-8 sm:px-5 lg:px-8">
-  <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[1.5rem] md:rounded-[2rem]">
-    {/* Image: nijer ratio te full dekhabe, kete jabe na */}
-    <Image
-      src="/images/Warm Tutoring Session with Colorful Study Props.png"
-      alt="A tutor helping a student with a book"
-      width={0}
-      height={0}
-      sizes="(min-width: 1152px) 1152px, 100vw"
-      priority
-      className="block h-auto w-full"
-    />
+      {/* Become a tutor: full image, fully responsive */}
+      <section className="bg-white px-4 py-8 sm:px-5 lg:px-8">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[1.5rem] md:rounded-[2rem]">
+          {/* Image: nijer ratio te full dekhabe, kete jabe na */}
+          <Image
+            src="/images/Warm Tutoring Session with Colorful Study Props.png"
+            alt="A tutor helping a student with a book"
+            width={0}
+            height={0}
+            sizes="(min-width: 1152px) 1152px, 100vw"
+            priority
+            className="block h-auto w-full"
+          />
 
-    {/* Card: mobile e image er niche, md+ e bottom-right e overlap */}
-    <div className="bg-[#FBE4E3] p-6 text-[#0A0E09] md:absolute md:bottom-0 md:right-0 md:w-[46%] md:max-w-[420px] md:rounded-tl-3xl md:p-6 lg:p-8">
-      <h2 className="text-2xl font-extrabold leading-tight md:text-xl lg:text-3xl">
-        You can become a great tutor too!
-      </h2>
-      <p className="mt-3 text-sm font-medium leading-6 text-[#0A0E09]/80">
-        Share your knowledge, post your tuition batches and become your own boss.
-      </p>
-      <Link
-        href="/sign-up"
-        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0A0E09] px-6 py-3.5 font-bold text-white transition hover:bg-[#96EE60] hover:text-[#0A0E09]"
-      >
-        Become a Tutor <ArrowRight size={18} />
-      </Link>
-    </div>
-  </div>
-</section>
+          {/* Card: mobile e image er niche, md+ e bottom-right e overlap */}
+          <div className="bg-[#FBE4E3] p-6 text-[#0A0E09] md:absolute md:bottom-0 md:right-0 md:w-[46%] md:max-w-[420px] md:rounded-tl-3xl md:p-6 lg:p-8">
+            <h2 className="text-2xl font-extrabold leading-tight md:text-xl lg:text-3xl">
+              You can become a great tutor too!
+            </h2>
+            <p className="mt-3 text-sm font-medium leading-6 text-[#0A0E09]/80">
+              Share your knowledge, post your tuition batches and become your own boss.
+            </p>
+            <Link
+              href="/sign-up"
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0A0E09] px-6 py-3.5 font-bold text-white transition hover:bg-[#96EE60] hover:text-[#0A0E09]"
+            >
+              Become a Tutor <ArrowRight size={18} />
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Pricing: white/pastel Free, green Pro */}
       <section className="bg-white py-20">

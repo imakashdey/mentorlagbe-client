@@ -134,14 +134,20 @@ function BrowseTuitionsContent() {
   const handleToggleBookmark = (tuition: Tuition, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const added = toggleBookmark(tuition);
+    const result = toggleBookmark(tuition, user?.plan || "free");
+    if (result.limitReached) {
+      toast.error(
+        "Free students can bookmark up to 5 tuitions. Upgrade to Pro for unlimited bookmarks!"
+      );
+      return;
+    }
     setBookmarkedIds((prev) => {
       const next = new Set(prev);
-      if (added) next.add(tuition._id);
+      if (result.added) next.add(tuition._id);
       else next.delete(tuition._id);
       return next;
     });
-    if (added) {
+    if (result.added) {
       toast.success("Tuition saved to your bookmarks!");
     } else {
       toast.info("Removed from bookmarks");

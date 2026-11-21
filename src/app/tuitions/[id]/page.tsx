@@ -120,9 +120,15 @@ export default function TuitionDetailsPage({
 
   const handleToggleBookmark = () => {
     if (!tuition) return;
-    const added = toggleBookmark(tuition);
-    setBookmarked(added);
-    if (added) toast.success("Saved to your bookmarks!");
+    const result = toggleBookmark(tuition, user?.plan || "free");
+    if (result.limitReached) {
+      toast.error(
+        "Free students can bookmark up to 5 tuitions. Upgrade to Pro for unlimited bookmarks!"
+      );
+      return;
+    }
+    setBookmarked(result.added);
+    if (result.added) toast.success("Saved to your bookmarks!");
     else toast.info("Removed from bookmarks");
   };
 
