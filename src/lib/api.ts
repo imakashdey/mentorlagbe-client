@@ -200,10 +200,39 @@ export async function getTuitionFilters(): Promise<{
   subjects: string[];
   classLevels: string[];
 }> {
-  return apiFetch<{ subjects: string[]; classLevels: string[] }>(
-    "/tuitions/filters",
-    { cache: "no-store" }
-  );
+  try {
+    return await apiFetch<{ subjects: string[]; classLevels: string[] }>(
+      "/tuitions/filters",
+      { cache: "no-store" }
+    );
+  } catch (err) {
+    return {
+      subjects: [
+        "Mathematics",
+        "Physics",
+        "Chemistry",
+        "Biology",
+        "Higher Math",
+        "General Math",
+        "English",
+        "IELTS",
+        "Programming",
+        "Accounting",
+        "Economics",
+      ],
+      classLevels: [
+        "Class 6",
+        "Class 7",
+        "Class 8",
+        "Class 9",
+        "Class 10",
+        "SSC",
+        "HSC",
+        "Admission",
+        "University",
+      ],
+    };
+  }
 }
 
 export async function getTuitionById(id: string): Promise<Tuition> {
