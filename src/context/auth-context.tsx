@@ -23,6 +23,9 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
+  isProfileDrawerOpen: boolean;
+  openProfileDrawer: () => void;
+  closeProfileDrawer: () => void;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (data: {
     name: string;
@@ -39,11 +42,14 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   token: null,
   loading: true,
+  isProfileDrawerOpen: false,
+  openProfileDrawer: () => { },
+  closeProfileDrawer: () => { },
   signIn: async () => false,
   signUp: async () => false,
-  signOut: async () => {},
+  signOut: async () => { },
   refreshUser: async () => null,
-  setUser: () => {},
+  setUser: () => { },
 });
 
 const USER_STORAGE_KEY = "mentorlagbe_user";
@@ -52,7 +58,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState<boolean>(false);
   const router = useRouter();
+
+  const openProfileDrawer = useCallback(() => setIsProfileDrawerOpen(true), []);
+  const closeProfileDrawer = useCallback(() => setIsProfileDrawerOpen(false), []);
 
   // Load from local storage immediately on mount to prevent any redirect flickers
   useEffect(() => {
@@ -77,6 +87,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Verify session in background
     const syncSession = async () => {
       try {
+        if (!initialToken && initialUser?.email) {
+          try {
+            initialToken = await getJwtToken(initialUser.email, initialUser.role);
+            setTokenState(initialToken);
+          } catch (e) {
+            console.warn("Could not acquire initial JWT:", e);
+          }
+        }
+
         if (initialToken) {
           const freshUser = await getMe();
           if (freshUser) {
@@ -103,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(fullUser));
 
             try {
-              const jwt = await getJwtToken();
+              const jwt = await getJwtToken(fullUser.email, fullUser.role);
               setTokenState(jwt);
             } catch (err) {
               console.warn("Could not acquire JWT for active session:", err);
@@ -151,7 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Obtain JWT token from backend
       let jwtToken: string | null = null;
       try {
-        jwtToken = await getJwtToken();
+        const detectedRole = (res.data?.user as any)?.role || "student";
+        jwtToken = await getJwtToken(email.trim(), detectedRole);
         setTokenState(jwtToken);
       } catch (jwtErr) {
         console.warn("JWT request error:", jwtErr);
@@ -248,6 +268,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         token,
         loading,
+        isProfileDrawerOpen,
+        openProfileDrawer,
+        closeProfileDrawer,
         signIn,
         signUp,
         signOut,

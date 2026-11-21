@@ -66,6 +66,33 @@ async function apiFetch<T>(
   }
 
   if (!res.ok) {
+    // If unauthorized on protected endpoint, try silent JWT refresh once using stored user
+    if (res.status === 401 && !endpoint.includes("/api/jwt") && typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("mentorlagbe_user");
+        let userEmail = "";
+        let userRole = "student";
+        if (stored) {
+          const u = JSON.parse(stored);
+          userEmail = u?.email || "";
+          userRole = u?.role || "student";
+        }
+        if (userEmail) {
+          const freshJwt = await getJwtToken(userEmail, userRole);
+          if (freshJwt) {
+            headers.set("Authorization", `Bearer ${freshJwt}`);
+            const retryRes = await fetch(url, { ...options, headers, credentials: "include" });
+            if (retryRes.ok) {
+              const retryType = retryRes.headers.get("content-type");
+              return (retryType && retryType.includes("application/json") ? await retryRes.json() : await retryRes.text()) as T;
+            }
+          }
+        }
+      } catch (refreshErr) {
+        // proceed to normal error handling
+      }
+    }
+
     const errorMsg =
       (data && typeof data === "object" && data.message) ||
       (typeof data === "string" && data) ||
@@ -77,8 +104,31 @@ async function apiFetch<T>(
 }
 
 // ---------------- AUTH & PROFILE ----------------
-export async function getJwtToken(): Promise<string> {
-  const data = await apiFetch<{ token: string }>("/api/jwt", { method: "POST" });
+export async function getJwtToken(email?: string, role?: string): Promise<string> {
+  // First attempt local Next.js route for 100% reliable zero-CORS issuance
+  if (typeof window !== "undefined") {
+    try {
+      const localRes = await fetch("/api/jwt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, role }),
+      });
+      if (localRes.ok) {
+        const localData = await localRes.json();
+        if (localData?.token) {
+          setToken(localData.token);
+          return localData.token;
+        }
+      }
+    } catch (e) {
+      // fallback to backend
+    }
+  }
+
+  const data = await apiFetch<{ token: string }>("/api/jwt", {
+    method: "POST",
+    body: JSON.stringify(email ? { email, role } : {}),
+  });
   if (data?.token) {
     setToken(data.token);
   }

@@ -27,7 +27,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, openProfileDrawer } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -225,18 +225,17 @@ export default function DashboardLayout({
               <p className="px-3 text-[10px] font-black uppercase tracking-wider text-white/40">
                 Account &amp; Settings
               </p>
-              <Link
-                href="/dashboard/profile"
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 rounded-xl px-3.5 py-3 text-xs font-bold transition mt-1.5 ${
-                  pathname === "/dashboard/profile"
-                    ? "bg-[#96EE60] text-[#0A0E09]"
-                    : "text-white/75 hover:bg-white/10 hover:text-white"
-                }`}
+              <button
+                type="button"
+                onClick={() => {
+                  setSidebarOpen(false);
+                  openProfileDrawer();
+                }}
+                className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left text-xs font-bold text-white/80 hover:bg-[#96EE60] hover:text-[#0A0E09] transition mt-1.5"
               >
                 <User size={18} />
-                <span>Update Profile</span>
-              </Link>
+                <span>Update Profile (Slide-Over)</span>
+              </button>
 
               {role !== "admin" && (
                 <Link
@@ -287,6 +286,14 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={openProfileDrawer}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#0A0E09]/15 bg-white px-3.5 py-1.5 text-xs font-bold text-[#0A0E09] hover:bg-[#96EE60] transition"
+            >
+              <User size={14} />
+              <span>Update Profile</span>
+            </button>
             <Link
               href="/tuitions"
               className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-[#0A0E09]/15 px-4 py-2 text-xs font-bold text-[#0A0E09] hover:bg-gray-50 transition"

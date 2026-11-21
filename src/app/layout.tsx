@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import ProfileDrawer from "@/components/profile-drawer";
 import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "sonner";
 
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col bg-white text-[#0A0E09] antialiased">
         <AuthProvider>
           <Toaster richColors position="top-right" closeButton />
+          <ProfileDrawer />
           <Suspense fallback={null}>
             <Navbar />
           </Suspense>
