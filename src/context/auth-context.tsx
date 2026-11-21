@@ -206,9 +206,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       toast.success("Welcome back!");
 
-      // Route to role dashboard
-      const targetRole = loggedUser?.role || "student";
-      router.push(`/dashboard/${targetRole}`);
+      // Redirect to home page upon sign in as requested
+      router.push("/");
       return true;
     } catch (err: any) {
       toast.error(err?.message || "Sign in failed");

@@ -6,11 +6,14 @@ import { Trash2, Loader2, ArrowUpRight, Search } from "lucide-react";
 import { getMyApplications, cancelApplication } from "@/lib/api";
 import { Application } from "@/types";
 import { toast } from "sonner";
+import Pagination from "@/components/pagination";
 
 export default function MyApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   const fetchApps = () => {
     setLoading(true);
@@ -43,6 +46,9 @@ export default function MyApplicationsPage() {
       setCancellingId(null);
     }
   };
+
+  const totalPages = Math.ceil(applications.length / pageSize);
+  const paginatedApps = applications.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="space-y-6">
@@ -84,7 +90,7 @@ export default function MyApplicationsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {applications.map((app) => {
+                {paginatedApps.map((app) => {
                   const isPending = app.status === "pending";
                   return (
                     <tr key={app._id} className="hover:bg-gray-50/50 transition">
@@ -169,6 +175,13 @@ export default function MyApplicationsPage() {
           </div>
         )}
       </div>
+
+      {/* Circular Pagination */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </div>
   );
 }

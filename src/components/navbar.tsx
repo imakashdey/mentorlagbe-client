@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import {
   GraduationCap,
@@ -13,8 +13,6 @@ import {
   LayoutDashboard,
   User,
   LogOut,
-  CreditCard,
-  Settings,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
@@ -27,10 +25,17 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, signOut, openProfileDrawer } = useAuth();
+  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Prevent hydration mismatch between server-rendered HTML and client state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -51,6 +56,16 @@ export default function Navbar() {
     setDropdownOpen(false);
     setMobileOpen(false);
   }, [pathname]);
+
+  const handleHowItWorksClick = (e: React.MouseEvent) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      const el = document.getElementById("how-it-works");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
 
   const getDashboardHref = () => {
     if (!user) return "/dashboard";
@@ -77,10 +92,13 @@ export default function Navbar() {
         <div className="hidden items-center gap-6 lg:flex">
           {navLinks.map((link) => {
             const active = pathname === link.href;
+            const isHowItWorks = link.name === "How It Works";
+
             return (
               <Link
                 key={link.name}
                 href={link.href}
+                onClick={isHowItWorks ? handleHowItWorksClick : undefined}
                 className={`text-sm font-semibold transition ${
                   active
                     ? "text-[#96EE60] font-bold"
@@ -91,7 +109,7 @@ export default function Navbar() {
               </Link>
             );
           })}
-          {user?.role === "student" && (
+          {mounted && user?.role === "student" && (
             <Link
               href="/dashboard/student/saved"
               className="flex items-center gap-1.5 text-sm font-semibold text-white/75 transition hover:text-[#96EE60]"
@@ -104,7 +122,9 @@ export default function Navbar() {
 
         {/* Desktop Auth / User Dropdown */}
         <div className="hidden items-center gap-3 lg:flex">
-          {user ? (
+          {!mounted ? (
+            <div className="h-9 w-24 rounded-full bg-white/10 animate-pulse" />
+          ) : user ? (
             <div className="relative" ref={dropdownRef}>
               {/* Trigger Button */}
               <button
@@ -120,7 +140,7 @@ export default function Navbar() {
                   />
                 ) : (
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#96EE60] text-xs font-black text-[#0A0E09]">
-                    {user.name.charAt(0).toUpperCase()}
+                    {user.name?.charAt(0).toUpperCase()}
                   </span>
                 )}
                 <div className="leading-tight">
@@ -184,7 +204,7 @@ export default function Navbar() {
                       <span>Dashboard Overview</span>
                     </Link>
 
-                    {/* Update Profile opens side-drawer */}
+                    {/* Update Profile opens slide-drawer */}
                     <button
                       type="button"
                       onClick={() => {
@@ -194,7 +214,7 @@ export default function Navbar() {
                       className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-bold text-gray-700 hover:bg-[#96EE60]/20 hover:text-[#0A0E09] transition"
                     >
                       <User size={15} className="text-[#0A0E09]" />
-                      <span>Update Profile (Slide Drawer)</span>
+                      <span>Update Profile</span>
                     </button>
 
                     {user.role === "student" && (
@@ -270,7 +290,7 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="border-t border-white/10 bg-[#0A0E09] px-5 pb-5 pt-3 lg:hidden">
           {/* User Preview if logged in */}
-          {user && (
+          {mounted && user && (
             <div className="mb-3 flex items-center gap-3 rounded-2xl bg-white/10 p-3">
               {user.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -281,7 +301,7 @@ export default function Navbar() {
                 />
               ) : (
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#96EE60] text-sm font-black text-[#0A0E09]">
-                  {user.name.charAt(0).toUpperCase()}
+                  {user.name?.charAt(0).toUpperCase()}
                 </span>
               )}
               <div className="min-w-0 flex-1">
@@ -304,18 +324,24 @@ export default function Navbar() {
           )}
 
           <div className="flex flex-col space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="rounded-xl px-3 py-2 text-sm font-semibold text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isHowItWorks = link.name === "How It Works";
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => {
+                    setMobileOpen(false);
+                    if (isHowItWorks) handleHowItWorksClick(e);
+                  }}
+                  className="rounded-xl px-3 py-2 text-sm font-semibold text-white/80 hover:bg-white/10 hover:text-white"
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
 
-            {user && (
+            {mounted && user && (
               <>
                 <Link
                   href={getDashboardHref()}
@@ -335,7 +361,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold text-white hover:bg-white/10"
                 >
                   <User size={16} />
-                  <span>Update Profile (Slide Drawer)</span>
+                  <span>Update Profile</span>
                 </button>
 
                 {user.role === "student" && (
@@ -365,7 +391,7 @@ export default function Navbar() {
 
           {/* Bottom Auth Buttons */}
           <div className="mt-4 border-t border-white/10 pt-3">
-            {user ? (
+            {mounted && user ? (
               <button
                 onClick={() => {
                   setMobileOpen(false);

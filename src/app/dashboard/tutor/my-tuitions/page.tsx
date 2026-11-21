@@ -10,8 +10,6 @@ import {
   Loader2,
   Search,
   ExternalLink,
-  Laptop,
-  MapPin,
   X,
 } from "lucide-react";
 import {
@@ -22,10 +20,13 @@ import {
 } from "@/lib/api";
 import { Tuition } from "@/types";
 import { toast } from "sonner";
+import Pagination from "@/components/pagination";
 
 export default function MyTuitionsPage() {
   const [tuitions, setTuitions] = useState<Tuition[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   // Edit Modal State
   const [editingTuition, setEditingTuition] = useState<Tuition | null>(null);
@@ -143,6 +144,9 @@ export default function MyTuitionsPage() {
     }
   };
 
+  const totalPages = Math.ceil(tuitions.length / pageSize);
+  const paginatedTuitions = tuitions.slice((page - 1) * pageSize, page * pageSize);
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -184,7 +188,7 @@ export default function MyTuitionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {tuitions.map((t) => {
+                {paginatedTuitions.map((t) => {
                   const isApproved = t.approvalStatus === "approved";
                   return (
                     <tr key={t._id} className="hover:bg-gray-50/50 transition">
@@ -298,6 +302,13 @@ export default function MyTuitionsPage() {
           </div>
         )}
       </div>
+
+      {/* Circular Pagination */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
 
       {/* Edit Tuition Modal */}
       {editingTuition && (

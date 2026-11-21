@@ -2,16 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, X, Loader2, ExternalLink, Filter, MapPin, Laptop } from "lucide-react";
+import { Check, X, Loader2 } from "lucide-react";
 import { getAdminTuitions, updateAdminTuitionApproval } from "@/lib/api";
 import { Tuition, ApprovalStatus } from "@/types";
 import { toast } from "sonner";
+import Pagination from "@/components/pagination";
 
 export default function AdminTuitionsApprovalPage() {
   const [tuitions, setTuitions] = useState<Tuition[]>([]);
   const [filter, setFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   const fetchTuitions = () => {
     setLoading(true);
@@ -52,6 +55,9 @@ export default function AdminTuitionsApprovalPage() {
     (t) => t.approvalStatus === "pending"
   ).length;
 
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paginatedTuitions = filtered.slice((page - 1) * pageSize, page * pageSize);
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -70,7 +76,10 @@ export default function AdminTuitionsApprovalPage() {
           {["all", "pending", "approved", "rejected"].map((tab) => (
             <button
               key={tab}
-              onClick={() => setFilter(tab)}
+              onClick={() => {
+                setFilter(tab);
+                setPage(1);
+              }}
               className={`rounded-xl px-3.5 py-1.5 text-xs font-black uppercase transition ${
                 filter === tab
                   ? "bg-[#0A0E09] text-white shadow-xs"
@@ -108,7 +117,7 @@ export default function AdminTuitionsApprovalPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filtered.map((t) => (
+                {paginatedTuitions.map((t) => (
                   <tr key={t._id} className="hover:bg-gray-50/50 transition">
                     {/* Tuition Listing */}
                     <td className="px-6 py-4">
@@ -200,6 +209,13 @@ export default function AdminTuitionsApprovalPage() {
           </div>
         )}
       </div>
+
+      {/* Circular Pagination (Shows when > 5 items) */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </div>
   );
 }

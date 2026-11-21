@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -14,10 +14,8 @@ import {
   LogOut,
   Menu,
   X,
-  GraduationCap,
   Sparkles,
   Bookmark,
-  CheckCircle2,
   ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
@@ -32,21 +30,20 @@ export default function DashboardLayout({
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // If loading, show pleasant skeleton
-  if (loading) {
+  // Safe client-side redirect inside useEffect to avoid React render-phase update warnings
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/sign-in");
+    }
+  }, [loading, user, router]);
+
+  // If loading or unauthenticated, show clean skeleton
+  if (loading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FDFCFB]">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#0A0E09] border-t-[#96EE60]" />
       </div>
     );
-  }
-
-  // If not logged in after loading finishes, redirect to login
-  if (!user) {
-    if (typeof window !== "undefined") {
-      router.push("/sign-in");
-    }
-    return null;
   }
 
   const role = user.role || "student";
@@ -142,16 +139,14 @@ export default function DashboardLayout({
         }`}
       >
         <div>
-          {/* Logo in Sidebar */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-5">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#96EE60] text-[#0A0E09]">
-                <GraduationCap size={20} />
+          {/* Sidebar Top: Panel Title (NO DUPLICATE LOGO - Logo is already in top navbar) */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#96EE60] animate-pulse" />
+              <span className="text-xs font-black uppercase tracking-wider text-white/90">
+                {role} Workspace
               </span>
-              <span className="text-lg font-black tracking-tight text-white">
-                Mentor<span className="text-[#96EE60]">Lagbe</span>
-              </span>
-            </Link>
+            </div>
             <button
               onClick={() => setSidebarOpen(false)}
               className="rounded-lg p-1 text-white/70 hover:bg-white/10 lg:hidden"
@@ -161,7 +156,7 @@ export default function DashboardLayout({
           </div>
 
           {/* User Profile Card */}
-          <div className="mt-6 flex items-center gap-3 rounded-2xl bg-white/5 p-3.5 border border-white/10">
+          <div className="mt-5 flex items-center gap-3 rounded-2xl bg-white/5 p-3.5 border border-white/10">
             {user.image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -234,7 +229,7 @@ export default function DashboardLayout({
                 className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left text-xs font-bold text-white/80 hover:bg-[#96EE60] hover:text-[#0A0E09] transition mt-1.5"
               >
                 <User size={18} />
-                <span>Update Profile (Slide-Over)</span>
+                <span>Update Profile</span>
               </button>
 
               {role !== "admin" && (
@@ -276,12 +271,21 @@ export default function DashboardLayout({
             >
               <Menu size={22} />
             </button>
+            {/* Clickable Breadcrumbs back to Dashboard */}
             <div className="flex items-center gap-2 text-xs font-bold text-[#0A0E09]/60">
-              <span>Dashboard</span>
+              <Link
+                href={`/dashboard/${role}`}
+                className="hover:text-[#0A0E09] hover:underline transition"
+              >
+                Dashboard
+              </Link>
               <ChevronRight size={14} />
-              <span className="capitalize text-[#0A0E09] font-extrabold">
+              <Link
+                href={`/dashboard/${role}`}
+                className="capitalize text-[#0A0E09] font-extrabold hover:underline transition"
+              >
                 {role}
-              </span>
+              </Link>
             </div>
           </div>
 

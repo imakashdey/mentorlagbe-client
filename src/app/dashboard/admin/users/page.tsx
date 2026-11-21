@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Users, Shield, User as UserIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { getAdminUsers, updateAdminUserRole } from "@/lib/api";
 import { User, Role } from "@/types";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import Pagination from "@/components/pagination";
 
 export default function UserManagementPage() {
   const { user: currentAdmin } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   const fetchUsers = () => {
     setLoading(true);
@@ -53,6 +56,9 @@ export default function UserManagementPage() {
     }
   };
 
+  const totalPages = Math.ceil(users.length / pageSize);
+  const paginatedUsers = users.slice((page - 1) * pageSize, page * pageSize);
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -85,7 +91,7 @@ export default function UserManagementPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {users.map((u) => {
+                {paginatedUsers.map((u) => {
                   const uid = u._id || u.id || u.email;
                   const isSelf = u.email === currentAdmin?.email;
 
@@ -184,6 +190,13 @@ export default function UserManagementPage() {
           </div>
         )}
       </div>
+
+      {/* Circular Pagination (Shows when > 5 users) */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </div>
   );
 }

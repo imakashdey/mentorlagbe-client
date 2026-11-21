@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, CreditCard, DollarSign, CheckCircle2 } from "lucide-react";
+import { Loader2, DollarSign, CheckCircle2 } from "lucide-react";
 import { getAdminTransactions } from "@/lib/api";
 import { Payment } from "@/types";
 import { toast } from "sonner";
+import Pagination from "@/components/pagination";
 
 export default function AdminTransactionsPage() {
   const [transactions, setTransactions] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   useEffect(() => {
     getAdminTransactions()
@@ -24,6 +27,9 @@ export default function AdminTransactionsPage() {
     (acc, curr) => acc + (curr.amount || 0),
     0
   );
+
+  const totalPages = Math.ceil(transactions.length / pageSize);
+  const paginatedTransactions = transactions.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="space-y-6">
@@ -75,7 +81,7 @@ export default function AdminTransactionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {transactions.map((tx) => (
+                {paginatedTransactions.map((tx) => (
                   <tr key={tx._id} className="hover:bg-gray-50/50 transition">
                     <td className="px-6 py-4">
                       <p className="font-extrabold text-[#0A0E09]">
@@ -130,6 +136,13 @@ export default function AdminTransactionsPage() {
           </div>
         )}
       </div>
+
+      {/* Circular Pagination */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </div>
   );
 }

@@ -100,7 +100,7 @@ export default function HomePage() {
       <TuitionSection />
 
       {/* How it works: sky blue + mint */}
-      <section id="how-it-works" className="bg-[#D9F0FF] py-20">
+      <section id="how-it-works" className="bg-[#D9F0FF] py-20 scroll-mt-16">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
           <div className="mx-auto mb-14 max-w-2xl text-center">
             <h2 className="text-3xl font-extrabold text-[#0A0E09] md:text-4xl">

@@ -97,7 +97,7 @@ export default function ProfileContent() {
           className="inline-flex items-center gap-2 self-start rounded-full bg-[#0A0E09] px-4 py-2.5 text-xs font-black text-white hover:bg-[#96EE60] hover:text-[#0A0E09] transition shadow-sm"
         >
           <SidebarOpen size={15} />
-          <span>Edit via Slide Drawer</span>
+          <span>Quick Edit Profile</span>
         </button>
       </div>
 

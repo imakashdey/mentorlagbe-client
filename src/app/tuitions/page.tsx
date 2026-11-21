@@ -22,6 +22,8 @@ import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 
+import Pagination from "@/components/pagination";
+
 const cardBg = ["bg-[#ECFAB5]", "bg-[#ECEEFE]", "bg-[#D9F0FF]", "bg-[#FBE4E3]"];
 
 function BrowseTuitionsContent() {
@@ -69,7 +71,7 @@ function BrowseTuitionsContent() {
         classLevel: classLevel || undefined,
         mode: mode || undefined,
         page,
-        limit: 9,
+        limit: 6,
       });
 
       setTuitions(res.data || []);
@@ -405,57 +407,15 @@ function BrowseTuitionsContent() {
           </div>
         )}
 
-        {/* Server-Side Pagination Bar (Optional 1) */}
-        {totalPages > 1 && (
-          <div className="mt-12 flex items-center justify-center gap-2">
-            <button
-              onClick={() => {
-                const prev = Math.max(page - 1, 1);
-                setPage(prev);
-                updateUrlParams({ page: prev });
-              }}
-              disabled={page <= 1}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#0A0E09]/15 bg-white text-[#0A0E09] transition hover:bg-[#96EE60] disabled:cursor-not-allowed disabled:opacity-30"
-              aria-label="Previous Page"
-            >
-              <ChevronLeft size={18} />
-            </button>
-
-            {Array.from({ length: totalPages }).map((_, i) => {
-              const p = i + 1;
-              const active = p === page;
-              return (
-                <button
-                  key={p}
-                  onClick={() => {
-                    setPage(p);
-                    updateUrlParams({ page: p });
-                  }}
-                  className={`h-10 w-10 rounded-full text-sm font-bold transition ${
-                    active
-                      ? "bg-[#0A0E09] text-white shadow-md"
-                      : "border border-[#0A0E09]/15 bg-white text-[#0A0E09] hover:bg-[#96EE60]"
-                  }`}
-                >
-                  {p}
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => {
-                const next = Math.min(page + 1, totalPages);
-                setPage(next);
-                updateUrlParams({ page: next });
-              }}
-              disabled={page >= totalPages}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#0A0E09]/15 bg-white text-[#0A0E09] transition hover:bg-[#96EE60] disabled:cursor-not-allowed disabled:opacity-30"
-              aria-label="Next Page"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        )}
+        {/* Circular Pagination (image 5 design) */}
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(p) => {
+            setPage(p);
+            updateUrlParams({ page: p });
+          }}
+        />
       </div>
     </div>
   );

@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, X, Loader2, Users, Phone, Calendar, BookOpen } from "lucide-react";
+import { Check, X, Loader2, Users, Phone } from "lucide-react";
 import { getTutorApplicants, updateApplicationStatus } from "@/lib/api";
 import { Application } from "@/types";
 import { toast } from "sonner";
+import Pagination from "@/components/pagination";
 
 export default function ManageApplicantsPage() {
   const [applicants, setApplicants] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   const fetchApplicants = () => {
     setLoading(true);
@@ -44,6 +47,9 @@ export default function ManageApplicantsPage() {
     }
   };
 
+  const totalPages = Math.ceil(applicants.length / pageSize);
+  const paginatedApplicants = applicants.slice((page - 1) * pageSize, page * pageSize);
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -77,7 +83,7 @@ export default function ManageApplicantsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {applicants.map((app) => (
+                {paginatedApplicants.map((app) => (
                   <tr key={app._id} className="hover:bg-gray-50/50 transition">
                     {/* Student Info */}
                     <td className="px-6 py-4">
@@ -185,6 +191,13 @@ export default function ManageApplicantsPage() {
           </div>
         )}
       </div>
+
+      {/* Circular Pagination */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </div>
   );
 }
