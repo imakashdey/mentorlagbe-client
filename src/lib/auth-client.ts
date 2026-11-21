@@ -6,7 +6,10 @@ export const API_URL =
   "https://mentorlagbe-server-taupe.vercel.app";
 
 export const authClient = createAuthClient({
-  baseURL: API_URL,
+  baseURL:
+    typeof window !== "undefined"
+      ? window.location.origin
+      : API_URL,
   fetchOptions: {
     credentials: "include",
   },

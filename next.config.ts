@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: "/api/auth/:path*",
+        destination: "https://mentorlagbe-server-taupe.vercel.app/api/auth/:path*",
+      },
+      {
         source: "/server-api/:path*",
         destination: "https://mentorlagbe-server-taupe.vercel.app/:path*",
       },

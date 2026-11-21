@@ -64,7 +64,8 @@ async function apiFetch<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const url = endpoint.startsWith("http") ? endpoint : `${API_URL}${endpoint}`;
+  const resolvedBase = typeof window !== "undefined" ? "/server-api" : API_URL;
+  const url = endpoint.startsWith("http") ? endpoint : `${resolvedBase}${endpoint}`;
 
   const res = await fetch(url, {
     ...options,
