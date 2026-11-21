@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { GraduationCap, Mail, MapPin, Phone } from "lucide-react";
 
 // Dark footer #0A0E09, Green #96EE60 for hover/accents
@@ -51,6 +52,8 @@ const social = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/dashboard")) return null;
   return (
     <footer className="bg-[#0A0E09] text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-8">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { GraduationCap, Menu, X, Bookmark, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
@@ -13,8 +14,12 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+
+  // Hide public navbar inside dashboard routes to maintain clean layout
+  if (pathname?.startsWith("/dashboard")) return null;
 
   const ghost =
     "rounded-full px-4 py-2.5 text-sm font-bold text-white hover:bg-white/10 transition";
