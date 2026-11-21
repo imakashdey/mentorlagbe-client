@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
   turbopack: {
     rules: {
@@ -11,6 +10,15 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  async rewrites() {
+    return [
+      {
+        source: "/server-api/:path*",
+        destination: "https://mentorlagbe-server-taupe.vercel.app/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
+

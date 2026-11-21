@@ -38,11 +38,26 @@ async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = getToken();
+  let token = getToken();
   const headers = new Headers(options.headers || {});
 
   if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
+  }
+
+  // Preemptively obtain token if user is signed in but token was cleared or not set
+  if (!token && !endpoint.includes("/api/jwt") && typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("mentorlagbe_user");
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u?.email) {
+          token = await getJwtToken(u.email, u.role || "student");
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   if (token && !headers.has("Authorization")) {
