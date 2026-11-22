@@ -2,6 +2,7 @@ import Link from "next/link";
 import TuitionSection from "@/components/tuition-section";
 import SubjectStrip from "@/components/subject-strip";
 import StatsSection from "@/components/stats-section";
+import Testimonials from "@/components/testimonials";
 import Image from "next/image";
 import {
   ArrowRight,
@@ -241,6 +242,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials & Community Feedback (Extra Section 2 & Optional 5) */}
+      <Testimonials />
     </>
   );
 }
