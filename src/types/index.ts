@@ -50,6 +50,22 @@ export interface Application {
   studentNote?: string;
   status: ApplicationStatus;
   appliedAt: string | Date;
+  rating?: number;
+  feedback?: string;
+  reviewedAt?: string | Date;
+}
+
+export interface Review {
+  _id?: string;
+  tuitionId: string;
+  tuitionTitle?: string;
+  studentName: string;
+  studentEmail: string;
+  studentImage?: string | null;
+  rating: number;
+  comment: string;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface Payment {

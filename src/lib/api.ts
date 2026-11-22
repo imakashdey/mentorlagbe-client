@@ -9,6 +9,7 @@ import {
   Role,
   ApprovalStatus,
   ApplicationStatus,
+  Review,
 } from "@/types";
 
 export const API_URL =
@@ -404,3 +405,59 @@ export async function verifyPaymentSession(
 export async function getMyPayments(): Promise<Payment[]> {
   return apiFetch<Payment[]>("/payments/my", { cache: "no-store" });
 }
+
+// ---------------- REVIEWS & RATINGS (Optional Requirement 5) ----------------
+export async function getTuitionReviews(
+  tuitionId: string
+): Promise<{ reviews: Review[]; averageRating: number; totalReviews: number }> {
+  try {
+    return await apiFetch<{
+      reviews: Review[];
+      averageRating: number;
+      totalReviews: number;
+    }>(`/reviews/tuition/${encodeURIComponent(tuitionId)}`, { cache: "no-store" });
+  } catch (err) {
+    console.warn("Failed to fetch tuition reviews:", err);
+    return { reviews: [], averageRating: 0, totalReviews: 0 };
+  }
+}
+
+export async function checkReviewEligibility(
+  tuitionId: string
+): Promise<{
+  eligible: boolean;
+  alreadyReviewed: boolean;
+  existingReview: Review | null;
+}> {
+  try {
+    return await apiFetch<{
+      eligible: boolean;
+      alreadyReviewed: boolean;
+      existingReview: Review | null;
+    }>(`/reviews/eligibility/${encodeURIComponent(tuitionId)}`, { cache: "no-store" });
+  } catch (err) {
+    return { eligible: false, alreadyReviewed: false, existingReview: null };
+  }
+}
+
+export async function submitReview(payload: {
+  tuitionId: string;
+  rating: number;
+  comment: string;
+}): Promise<{ message: string; review: Review }> {
+  return apiFetch<{ message: string; review: Review }>("/reviews", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function submitApplicationReview(
+  applicationId: string,
+  payload: { rating: number; feedback: string }
+): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/applications/${applicationId}/review`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+

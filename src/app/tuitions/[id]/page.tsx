@@ -20,8 +20,15 @@ import {
   Star,
   MessageSquare,
 } from "lucide-react";
-import { getTuitionById, applyTuition, checkApplication } from "@/lib/api";
-import { Tuition } from "@/types";
+import {
+  getTuitionById,
+  applyTuition,
+  checkApplication,
+  getTuitionReviews,
+  checkReviewEligibility,
+  submitReview,
+} from "@/lib/api";
+import { Tuition, Review } from "@/types";
 import { useAuth } from "@/context/auth-context";
 import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { toast } from "sonner";
@@ -48,22 +55,25 @@ export default function TuitionDetailsPage({
   const [studentNote, setStudentNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Reviews mock for Student Review & Rating system (Optional 5)
-  const [reviews] = useState([
-    {
-      studentName: "Mim Chowdhury",
-      rating: 5,
-      comment: "Incredible mentor! Clarified all my doubts and guided me with exam strategies.",
-      date: "2 weeks ago",
-    },
-    {
-      studentName: "Sabbir Hossain",
-      rating: 5,
-      comment: "Very systematic and punctual. Weekly tests really helped my score improve.",
-      date: "1 month ago",
-    },
-  ]);
+  // Real Reviews & Ratings state (Optional Requirement 5)
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
+  // Review Form & Eligibility
+  const [reviewEligibility, setReviewEligibility] = useState<{
+    eligible: boolean;
+    alreadyReviewed: boolean;
+    existingReview: Review | null;
+  } | null>(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [ratingInput, setRatingInput] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [commentInput, setCommentInput] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  // Load tuition details
   useEffect(() => {
     getTuitionById(id)
       .then((data) => {
@@ -77,7 +87,22 @@ export default function TuitionDetailsPage({
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Check if current student has already applied
+  // Load real reviews for this tuition
+  useEffect(() => {
+    if (id) {
+      setLoadingReviews(true);
+      getTuitionReviews(id)
+        .then((res) => {
+          setReviews(res.reviews || []);
+          setAverageRating(res.averageRating || 0);
+          setTotalReviews(res.totalReviews || 0);
+        })
+        .catch((err) => console.error("Reviews load error:", err))
+        .finally(() => setLoadingReviews(false));
+    }
+  }, [id]);
+
+  // Check application status and review eligibility for logged-in students
   useEffect(() => {
     if (user && user.role === "student" && id) {
       setCheckingApplied(true);
@@ -89,8 +114,57 @@ export default function TuitionDetailsPage({
         })
         .catch(() => {})
         .finally(() => setCheckingApplied(false));
+
+      // Check if student's application was accepted, making them eligible to review
+      checkReviewEligibility(id)
+        .then((elig) => {
+          setReviewEligibility(elig);
+          if (elig?.existingReview) {
+            setRatingInput(elig.existingReview.rating);
+            setCommentInput(elig.existingReview.comment);
+          }
+        })
+        .catch(() => {});
     }
   }, [user, id]);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ratingInput || ratingInput < 1 || ratingInput > 5) {
+      toast.error("Please select a rating between 1 and 5 stars");
+      return;
+    }
+    if (!commentInput.trim()) {
+      toast.error("Please write your review feedback");
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const res = await submitReview({
+        tuitionId: id,
+        rating: ratingInput,
+        comment: commentInput.trim(),
+      });
+      toast.success(res.message || "Thank you! Your review has been saved.");
+      setShowReviewForm(false);
+
+      // Refresh reviews list and eligibility state
+      const updated = await getTuitionReviews(id);
+      setReviews(updated.reviews || []);
+      setAverageRating(updated.averageRating || 0);
+      setTotalReviews(updated.totalReviews || 0);
+      setReviewEligibility({
+        eligible: true,
+        alreadyReviewed: true,
+        existingReview: res.review,
+      });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to submit review");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const handleApplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,53 +346,250 @@ export default function TuitionDetailsPage({
               </div>
             </div>
 
-            {/* Reviews / Feedback (Optional 5) */}
-            <div className="mt-10 rounded-[2rem] bg-white p-7 shadow-sm border border-[#0A0E09]/5">
-              <div className="flex items-center justify-between">
+            {/* Reviews / Feedback (Optional Requirement 5: Student Review & Rating System) */}
+            <div id="reviews-section" className="mt-10 rounded-[2rem] bg-white p-7 shadow-sm border border-[#0A0E09]/5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h3 className="text-lg font-black text-[#0A0E09]">
-                    Student Feedback & Ratings
+                    Student Feedback &amp; Ratings
                   </h3>
                   <p className="text-xs text-[#0A0E09]/60">
                     Verified reviews from enrolled students
                   </p>
                 </div>
-                <div className="flex items-center gap-1 rounded-xl bg-[#ECFAB5] px-3 py-1 text-xs font-black">
-                  <Star size={14} className="fill-[#0A0E09]" /> 5.0 (2 Reviews)
+                <div className="flex items-center gap-1.5 self-start rounded-xl bg-[#ECFAB5] px-3.5 py-1.5 text-xs font-black text-[#0A0E09]">
+                  <Star size={15} className="fill-amber-500 text-amber-500" />
+                  <span>
+                    {averageRating > 0 ? averageRating.toFixed(1) : "New"} (
+                    {totalReviews} {totalReviews === 1 ? "Review" : "Reviews"})
+                  </span>
                 </div>
               </div>
 
+              {/* Review Submission Form or Trigger for Eligible Students */}
+              {user?.role === "student" && (
+                <div className="mt-6 rounded-2xl bg-[#0A0E09]/[0.02] border border-[#0A0E09]/10 p-5">
+                  {reviewEligibility?.eligible ? (
+                    <div>
+                      {!showReviewForm ? (
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">
+                              <CheckCircle2 size={13} /> Enrolled Student
+                            </span>
+                            <h4 className="mt-1.5 text-sm font-black text-[#0A0E09]">
+                              {reviewEligibility.alreadyReviewed
+                                ? "You have already reviewed this tuition"
+                                : "Share your learning experience"}
+                            </h4>
+                            <p className="text-xs text-[#0A0E09]/60">
+                              {reviewEligibility.alreadyReviewed
+                                ? "You can update your rating and feedback anytime."
+                                : "Your honest review helps other students choose the best mentor."}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowReviewForm(true)}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-[#96EE60] px-4 py-2 text-xs font-black text-[#0A0E09] hover:brightness-95 transition shadow-sm self-start sm:self-center"
+                          >
+                            <Star size={14} className="fill-[#0A0E09]" />
+                            {reviewEligibility.alreadyReviewed
+                              ? "Edit My Review"
+                              : "Write a Review"}
+                          </button>
+                        </div>
+                      ) : (
+                        <form onSubmit={handleReviewSubmit} className="space-y-4">
+                          <div className="flex items-center justify-between border-b border-gray-200/60 pb-3">
+                            <div>
+                              <h4 className="text-sm font-black text-[#0A0E09]">
+                                {reviewEligibility.alreadyReviewed
+                                  ? "Update Your Review"
+                                  : "Write a Review"}
+                              </h4>
+                              <p className="text-[11px] text-[#0A0E09]/60">
+                                Rate your mentor and leave constructive feedback
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setShowReviewForm(false)}
+                              className="text-xs font-bold text-gray-500 hover:text-gray-800"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+
+                          {/* Interactive 5-Star Selector */}
+                          <div>
+                            <label className="block text-xs font-bold text-[#0A0E09] mb-1.5">
+                              Rating: <span className="text-amber-600 font-black">{ratingInput} Star{ratingInput > 1 ? "s" : ""}</span>
+                            </label>
+                            <div className="flex items-center gap-1.5">
+                              {[1, 2, 3, 4, 5].map((star) => {
+                                const isFilled =
+                                  (hoverRating || ratingInput) >= star;
+                                return (
+                                  <button
+                                    key={star}
+                                    type="button"
+                                    onClick={() => setRatingInput(star)}
+                                    onMouseEnter={() => setHoverRating(star)}
+                                    onMouseLeave={() => setHoverRating(0)}
+                                    className="p-1 transition-transform hover:scale-110 focus:outline-none"
+                                  >
+                                    <Star
+                                      size={26}
+                                      className={`transition-colors ${
+                                        isFilled
+                                          ? "fill-amber-400 text-amber-400 drop-shadow-xs"
+                                          : "text-gray-300"
+                                      }`}
+                                    />
+                                  </button>
+                                );
+                              })}
+                              <span className="ml-2 text-xs font-semibold text-gray-500">
+                                {ratingInput === 5
+                                  ? "Excellent"
+                                  : ratingInput === 4
+                                  ? "Very Good"
+                                  : ratingInput === 3
+                                  ? "Good"
+                                  : ratingInput === 2
+                                  ? "Fair"
+                                  : "Poor"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Feedback Textarea */}
+                          <div>
+                            <label className="block text-xs font-bold text-[#0A0E09] mb-1.5">
+                              Review Feedback *
+                            </label>
+                            <textarea
+                              rows={3}
+                              required
+                              value={commentInput}
+                              onChange={(e) => setCommentInput(e.target.value)}
+                              placeholder="How was the mentor's teaching style, punctuality, and concept explanations?"
+                              className="w-full rounded-xl border border-gray-200 bg-white p-3 text-xs text-[#0A0E09] placeholder:text-gray-400 focus:border-[#96EE60] focus:ring-2 focus:ring-[#96EE60]/20 focus:outline-none"
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-end gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() => setShowReviewForm(false)}
+                              className="rounded-full px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 transition"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              disabled={submittingReview}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-[#0A0E09] px-5 py-2.5 text-xs font-black text-white hover:bg-[#96EE60] hover:text-[#0A0E09] transition disabled:opacity-50 shadow-md"
+                            >
+                              {submittingReview ? (
+                                <>
+                                  <Loader2 size={13} className="animate-spin" /> Saving...
+                                </>
+                              ) : (
+                                "Submit Review"
+                              )}
+                            </button>
+                          </div>
+                        </form>
+                      )}
+                    </div>
+                  ) : applied ? (
+                    <div className="flex items-center gap-2.5 text-xs text-amber-800">
+                      <Clock size={16} className="shrink-0 text-amber-600" />
+                      <span>
+                        Your application for this tuition is pending. Once the tutor accepts your application, you can rate and leave a review.
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2.5 text-xs text-gray-600">
+                      <MessageSquare size={16} className="shrink-0 text-gray-400" />
+                      <span>
+                        Reviews are exclusive to enrolled students whose applications have been accepted by the tutor.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Reviews List */}
               <div className="mt-6 space-y-4">
-                {reviews.map((rev, i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl bg-gray-50 p-4 border border-gray-100"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#7FD09F] text-xs font-black">
-                          {rev.studentName.charAt(0)}
-                        </span>
-                        <div>
-                          <p className="text-xs font-bold text-[#0A0E09]">
-                            {rev.studentName}
-                          </p>
-                          <span className="text-[10px] text-gray-500">
-                            {rev.date}
-                          </span>
+                {loadingReviews ? (
+                  <div className="flex justify-center py-6">
+                    <Loader2 size={24} className="animate-spin text-[#96EE60]" />
+                  </div>
+                ) : reviews.length > 0 ? (
+                  reviews.map((rev, i) => (
+                    <div
+                      key={rev._id || i}
+                      className="rounded-2xl bg-gray-50/80 p-4 border border-gray-100 hover:bg-gray-50 transition"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          {rev.studentImage ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={rev.studentImage}
+                              alt={rev.studentName}
+                              className="h-8 w-8 rounded-full object-cover ring-2 ring-[#96EE60]"
+                            />
+                          ) : (
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#96EE60] text-xs font-black text-[#0A0E09]">
+                              {rev.studentName?.charAt(0) || "S"}
+                            </span>
+                          )}
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-xs font-bold text-[#0A0E09]">
+                                {rev.studentName}
+                              </p>
+                              <span className="rounded bg-emerald-50 px-1.5 py-0.2 text-[9px] font-black text-emerald-700">
+                                Verified Student
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-gray-400">
+                              {rev.createdAt
+                                ? new Date(rev.createdAt).toLocaleDateString("en-BD", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  })
+                                : "Recently"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex text-amber-400">
+                          {Array.from({ length: rev.rating || 5 }).map((_, r) => (
+                            <Star key={r} size={13} className="fill-current" />
+                          ))}
                         </div>
                       </div>
-                      <div className="flex text-amber-500">
-                        {Array.from({ length: rev.rating }).map((_, r) => (
-                          <Star key={r} size={12} className="fill-current" />
-                        ))}
-                      </div>
+                      <p className="mt-2.5 text-xs text-[#0A0E09]/80 leading-relaxed">
+                        &quot;{rev.comment}&quot;
+                      </p>
                     </div>
-                    <p className="mt-2.5 text-xs text-[#0A0E09]/75 leading-relaxed">
-                      &quot;{rev.comment}&quot;
+                  ))
+                ) : (
+                  <div className="rounded-2xl bg-gray-50/50 p-6 text-center border border-dashed border-gray-200">
+                    <MessageSquare size={24} className="mx-auto text-gray-300" />
+                    <p className="mt-2 text-xs font-medium text-gray-500">
+                      No reviews yet for this tuition.
+                    </p>
+                    <p className="text-[11px] text-gray-400">
+                      Enrolled students with accepted applications will share their feedback here.
                     </p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
