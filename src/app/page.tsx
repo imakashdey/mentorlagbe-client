@@ -1,16 +1,14 @@
 import Link from "next/link";
 import TuitionSection from "@/components/tuition-section";
-import Testimonials from "@/components/testimonials";
 import SubjectStrip from "@/components/subject-strip";
+import StatsSection from "@/components/stats-section";
 import Image from "next/image";
 import {
   ArrowRight,
-  BadgeCheck,
   BookOpen,
   CheckCircle2,
   GraduationCap,
   Search,
-  Sparkles,
   Users,
 } from "lucide-react";
 
@@ -19,13 +17,6 @@ import {
  * Dark #0A0E09 · Pink #FBE4E3 · Lime #ECFAB5 · Lavender #ECEEFE
  * Sky #D9F0FF · Green #96EE60 (CTA/active) · Mint #7FD09F (badges/success)
  */
-
-const stats = [
-  { value: "500+", label: "Verified tutors", icon: BadgeCheck, tint: "bg-[#96EE60]" },
-  { value: "2,000+", label: "Happy students", icon: Users, tint: "bg-[#ECFAB5]" },
-  { value: "20+", label: "Subjects covered", icon: GraduationCap, tint: "bg-[#ECEEFE]" },
-  { value: "Free", label: "To get started", icon: Sparkles, tint: "bg-[#D9F0FF]" },
-];
 
 const steps = [
   {
@@ -99,6 +90,36 @@ export default function HomePage() {
       {/* Latest tuitions (pastel image cards) */}
       <TuitionSection />
 
+      {/* Become a tutor: full image, fully responsive */}
+      <section className="bg-white px-4 py-8 sm:px-5 lg:px-8">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[1.5rem] md:rounded-[2rem]">
+          <Image
+            src="/images/Warm Tutoring Session with Colorful Study Props.png"
+            alt="A tutor helping a student with a book"
+            width={0}
+            height={0}
+            sizes="(min-width: 1152px) 1152px, 100vw"
+            priority
+            className="block h-auto w-full"
+          />
+
+          <div className="bg-[#FBE4E3] p-6 text-[#0A0E09] md:absolute md:bottom-0 md:right-0 md:w-[46%] md:max-w-[420px] md:rounded-tl-3xl md:p-6 lg:p-8">
+            <h2 className="text-2xl font-extrabold leading-tight md:text-xl lg:text-3xl">
+              You can become a great tutor too!
+            </h2>
+            <p className="mt-3 text-sm font-medium leading-6 text-[#0A0E09]/80">
+              Share your knowledge, post your tuition batches and become your own boss.
+            </p>
+            <Link
+              href="/sign-up"
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0A0E09] px-6 py-3.5 font-bold text-white transition hover:bg-[#96EE60] hover:text-[#0A0E09]"
+            >
+              Become a Tutor <ArrowRight size={18} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* How it works: sky blue + mint */}
       <section id="how-it-works" className="bg-[#D9F0FF] py-20 scroll-mt-16">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
@@ -115,10 +136,7 @@ export default function HomePage() {
             {steps.map((step) => {
               const Icon = step.icon;
               return (
-                <div
-                  key={step.number}
-                  className="rounded-[2rem] bg-white p-8"
-                >
+                <div key={step.number} className="rounded-[2rem] bg-white p-8">
                   <div className="flex items-center justify-between">
                     <span className="text-4xl font-black text-[#0A0E09]/15">
                       {step.number}
@@ -140,82 +158,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats band */}
-      <section className="bg-white px-5 py-16 lg:px-8">
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-[#0A0E09] px-6 py-12 md:px-12 md:py-14">
-          <div className="absolute -left-20 -top-24 h-64 w-64 rounded-full bg-[#96EE60]/20 blur-3xl" />
-          <div className="absolute -bottom-24 -right-20 h-64 w-64 rounded-full bg-[#ECEEFE]/15 blur-3xl" />
-
-          <div className="relative mx-auto mb-10 max-w-2xl text-center">
-            <h2 className="text-3xl font-extrabold text-white md:text-4xl">
-              MentorLagbe in{" "}
-              <span className="rounded-lg bg-[#96EE60] px-2 text-[#0A0E09]">numbers</span>
-            </h2>
-            <p className="mt-3 text-white/60">
-              A growing community of students and tutors learning together.
-            </p>
-          </div>
-
-          <div className="relative grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
-            {stats.map((s) => {
-              const Icon = s.icon;
-              return (
-                <div
-                  key={s.label}
-                  className="flex h-full flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center transition hover:-translate-y-1 hover:bg-white/10"
-                >
-                  <span
-                    className={`flex h-14 w-14 items-center justify-center rounded-2xl text-[#0A0E09] ${s.tint}`}
-                  >
-                    <Icon size={26} />
-                  </span>
-                  <p className="mt-5 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
-                    {s.value}
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white/60">
-                    {s.label}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials: lavender */}
-      <Testimonials />
-
-      {/* Become a tutor: full image, fully responsive */}
-      <section className="bg-white px-4 py-8 sm:px-5 lg:px-8">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[1.5rem] md:rounded-[2rem]">
-          {/* Image: nijer ratio te full dekhabe, kete jabe na */}
-          <Image
-            src="/images/Warm Tutoring Session with Colorful Study Props.png"
-            alt="A tutor helping a student with a book"
-            width={0}
-            height={0}
-            sizes="(min-width: 1152px) 1152px, 100vw"
-            priority
-            className="block h-auto w-full"
-          />
-
-          {/* Card: mobile e image er niche, md+ e bottom-right e overlap */}
-          <div className="bg-[#FBE4E3] p-6 text-[#0A0E09] md:absolute md:bottom-0 md:right-0 md:w-[46%] md:max-w-[420px] md:rounded-tl-3xl md:p-6 lg:p-8">
-            <h2 className="text-2xl font-extrabold leading-tight md:text-xl lg:text-3xl">
-              You can become a great tutor too!
-            </h2>
-            <p className="mt-3 text-sm font-medium leading-6 text-[#0A0E09]/80">
-              Share your knowledge, post your tuition batches and become your own boss.
-            </p>
-            <Link
-              href="/sign-up"
-              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0A0E09] px-6 py-3.5 font-bold text-white transition hover:bg-[#96EE60] hover:text-[#0A0E09]"
-            >
-              Become a Tutor <ArrowRight size={18} />
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Stats: real numbers from database */}
+      <StatsSection />
 
       {/* Pricing: white/pastel Free, green Pro */}
       <section className="bg-white py-20">
