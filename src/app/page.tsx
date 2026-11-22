@@ -42,50 +42,65 @@ const steps = [
 export default function HomePage() {
   return (
     <>
-      {/* Hero: soft pink, dark heading, green search button */}
-      <section className="relative overflow-hidden rounded-b-[2.5rem] bg-[#FBE4E3] px-5 pb-10 pt-16 md:rounded-b-[3.5rem] md:pt-24 lg:px-8">
-        <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#ECEEFE] blur-3xl" />
-        <div className="absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[#ECFAB5]/70 blur-3xl" />
+      {/* Hero: text + search on left, image on right */}
+<section className="relative overflow-hidden rounded-b-[2.5rem] bg-[#FBE4E3] px-5 pb-10 pt-12 md:rounded-b-[3.5rem] md:pt-16 lg:px-8">
+  <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#ECEEFE] blur-3xl" />
+  <div className="absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[#ECFAB5]/70 blur-3xl" />
 
-        <div className="relative mx-auto max-w-4xl text-center">
-          <h1 className="text-5xl font-black leading-[1.1] tracking-tight text-[#0A0E09] sm:text-6xl lg:text-7xl">
-            Find Your Ideal
-            <br />
-            <span className="text-[#96EE60]">TUTOR</span> Today
-          </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base text-[#0A0E09]/70 md:text-lg">
-            Online or offline, choose verified tutors by subject, class level and
-            monthly budget.
-          </p>
+  <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2">
+    <div className="text-center lg:text-left">
+      <h1 className="text-5xl font-black leading-[1.1] tracking-tight text-[#0A0E09] sm:text-6xl">
+        Find Your Ideal
+        <br />
+        <span className="text-[#96EE60]">TUTOR</span> Today
+      </h1>
+      <p className="mx-auto mt-5 max-w-xl text-base text-[#0A0E09]/70 md:text-lg lg:mx-0">
+        Online or offline, choose verified tutors by subject, class level and
+        monthly budget.
+      </p>
 
-          {/* Search -> /tuitions?search=... */}
-          <form
-            action="/tuitions"
-            method="GET"
-            className="mx-auto mt-10 max-w-2xl rounded-full bg-white/60 p-2 shadow-xl shadow-[#0A0E09]/5 backdrop-blur"
+      <form
+        action="/tuitions"
+        method="GET"
+        className="mx-auto mt-8 max-w-xl rounded-full bg-white/60 p-2 shadow-xl shadow-[#0A0E09]/5 backdrop-blur lg:mx-0"
+      >
+        <div className="flex items-center gap-3 rounded-full bg-white py-2 pl-5 pr-2">
+          <BookOpen size={20} className="shrink-0 text-[#0A0E09]" />
+          <input
+            type="text"
+            name="search"
+            placeholder='Try "Mathematics" or "IELTS"'
+            className="w-full bg-transparent text-base font-semibold text-[#0A0E09] outline-none placeholder:font-medium placeholder:text-[#0A0E09]/45"
+          />
+          <button
+            type="submit"
+            className="shrink-0 rounded-full bg-[#96EE60] px-6 py-3.5 font-bold text-[#0A0E09] transition hover:brightness-95 sm:px-8"
           >
-            <div className="flex items-center gap-3 rounded-full bg-white py-2 pl-5 pr-2">
-              <BookOpen size={20} className="shrink-0 text-[#0A0E09]" />
-              <input
-                type="text"
-                name="search"
-                placeholder='Try "Mathematics" or "IELTS"'
-                className="w-full bg-transparent text-base font-semibold text-[#0A0E09] outline-none placeholder:font-medium placeholder:text-[#0A0E09]/45"
-              />
-              <button
-                type="submit"
-                className="shrink-0 rounded-full bg-[#96EE60] px-8 py-3.5 font-bold text-[#0A0E09] transition hover:brightness-95"
-              >
-                Search
-              </button>
-            </div>
-          </form>
+            Search
+          </button>
         </div>
+      </form>
+    </div>
 
-        <div className="relative mt-10">
-          <SubjectStrip />
-        </div>
-      </section>
+    <div className="relative mx-auto w-full max-w-xl">
+      <div className="overflow-hidden rounded-[2rem] border-4 border-white shadow-xl shadow-[#0A0E09]/10">
+        <Image
+          src="/images/hero.jpg"
+          alt="A student learning with a tutor"
+          width={1200}
+          height={900}
+          priority
+          sizes="(min-width: 1024px) 576px, 100vw"
+          className="h-[320px] w-full object-cover sm:h-[400px] lg:h-[460px]"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div className="relative mt-10">
+    <SubjectStrip />
+  </div>
+</section>
 
       {/* Latest tuitions (pastel image cards) */}
       <TuitionSection />
