@@ -1,109 +1,79 @@
-# MentorLagbe (Smart Tuition & Mentorship Platform)
+# MentorLagbe Server
 
-A full-stack, role-based EdTech platform connecting qualified Tutors offering subject-wise tuition batches or 1-on-1 mentorship with Students seeking personalized academic guidance, moderated by Administrators.
+Express + MongoDB REST API for **MentorLagbe**, a role-based tuition and mentorship platform (Students, Tutors, Admins).
 
-- **Live Frontend URL:** [https://mentorlagbe-client.vercel.app](https://mentorlagbe-client.vercel.app)
-- **Live Backend API URL:** [https://mentorlagbe-server-taupe.vercel.app](https://mentorlagbe-server-taupe.vercel.app)
+- **Live API:** https://mentorlagbe-server-taupe.vercel.app
+- **Live Client:** https://mentorlagbe-client-livid.vercel.app
+- **Client Repo:** https://github.com/imakashdey/mentorlagbe-client
 
----
+## Demo Credentials
 
-## 🔑 Demo & Testing Credentials
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@mentorlagbe.com | Admin@123456 |
+| Pro Tutor | rahim.tutor@mentorlagbe.com | Tutor@123456 |
+| Student (Free) | student1@mentorlagbe.com | Student@123456 |
 
-For quick evaluation, one-click demo credentials buttons are available directly on the **Sign In** page.
+## Key Features
 
-| Role | Email | Password | Privileges / Features |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@mentorlagbe.com` | `Admin@123456` | Platform stats, user role management, tuition approval flow, Stripe transaction log |
-| **Pro Tutor** | `rahim.tutor@mentorlagbe.com` | `Tutor@123456` | Unlimited tuition posts, verified badge, applicant accept/reject, active toggle |
-| **Free Tutor** | `imran.tutor@mentorlagbe.com` | `Tutor@123456` | 2 free tuition posts limit test, Pro upgrade flow |
-| **Student (Pro)** | `student2@mentorlagbe.com` | `Student@123456` | Priority booking, apply for tuitions, track applications, cancel pending applications |
-| **Student (Free)** | `student1@mentorlagbe.com` | `Student@123456` | Apply for tuitions, cancel pending applications, bookmark tuitions |
+- BetterAuth with MongoDB adapter (`/api/auth/*`) and role-aware sign up
+- JWT issuing only for users with a valid session (`POST /api/jwt`)
+- Role middlewares: `verifyToken`, `verifyStudent`, `verifyTutor`, `verifyAdmin`
+- Tuitions: server-side search, filters and pagination; full CRUD for tutors; free plan limit of 2 posts
+- Applications: students apply (duplicates blocked), tutors accept/reject
+- Admin: approve/reject tuitions, manage user roles, view transactions
+- Stripe Checkout with session verification, saving payments and upgrading the user plan to `pro`
+- Public `/stats` endpoint returning real platform counts
+- Restricted CORS (localhost and `CLIENT_URL` only)
 
----
+## MongoDB Collections
 
-## 🌟 Key Features
+`users`, `tuitions`, `applications`, `payments`
 
-### 1. Robust Role-Based Authentication & Authorization
-- Powered by **BetterAuth** with MongoDB adapter and client-side plugins.
-- **JWT token integration:** Protected API calls pass `Authorization: Bearer <token>`.
-- Custom Express role middlewares: `verifyToken`, `verifyStudent`, `verifyTutor`, `verifyAdmin`.
-- **Zero-Flicker Session Persistence:** Authenticated users never get booted or redirected to login on page reloads.
+## Main Endpoints
 
-### 2. Browse Tuitions & Server-Side Filtering (Challenge 1 & Optional 1)
-- **Server-Side Search:** Instant lookup by tuition title or subject.
-- **Multi-Parameter Filtering:** Subject, class level (SSC, HSC, Admission, University, etc.), mode (Online vs Offline).
-- **Server-Side Pagination:** MongoDB `.skip()` and `.limit()` with Previous, Next, and Page number controls.
-- **Bookmarks & Saved Tuitions (Optional 3):** Students can bookmark favorite listings and view them in their saved dashboard.
+| Route | Description |
+|-------|-------------|
+| `/api/auth/*` | BetterAuth (sign up, sign in, session) |
+| `POST /api/jwt` | Issue JWT for the signed-in user |
+| `/tuitions` | Public list, latest, filters, details; tutor CRUD |
+| `/applications` | Student apply/cancel, tutor manage applicants |
+| `/users` | Profile update, bookmarks |
+| `/admin` | Users, tuition moderation, stats, transactions |
+| `/payments` | Stripe checkout and session verification |
+| `GET /stats` | Public platform statistics |
+| `GET /me` | Current user (JWT required) |
 
-### 3. Tuition Details & Role-Restricted Application Flow
-- Comprehensive tuition batch details: title, subject, schedule, mode, location, monthly fee, description, tutor bio, and verified badges.
-- **Role Enforcement:** Only accounts with `role: "student"` can apply. Tutors and Admins are restricted with notices.
-- Prevents duplicate applications from the same student for the same tuition.
-- Real-time application tracking with instant status badges (`Pending`, `Accepted`, `Rejected`).
+## NPM Packages
 
-### 4. Direct Image Upload via ImgBB API (Challenge 3)
-- Direct image file upload to **ImgBB API** on both the **Tutor's Post a Tuition** page and the shared **Update Profile** page.
-- Instant image preview and direct URL fallback.
+`express`, `cors`, `dotenv`, `mongodb`, `better-auth`, `@better-auth/mongo-adapter`, `jsonwebtoken`, `stripe`
 
-### 5. Stripe Subscription Checkout & Database Sync
-- Seamless Stripe Checkout Session integration for upgrading to Pro Plan:
-  - **Tutors ($15):** Unlimited tuition posts and verified mentor badge.
-  - **Students ($10):** Priority application queue and enhanced booking.
-- Automated session verification (`/payments/verify-session`) recording transactions in the `payments` collection and upgrading the user's plan to `pro` in the `users` collection.
-- Custom `/payment/success` and `/payment/cancel` status pages.
+## Local Setup
 
-### 6. Role-Based Dashboards
-- **Student Dashboard:** Overview stats, My Applications management (with cancel action for pending submissions), and Saved Tuitions.
-- **Tutor Dashboard:** Overview stats, Post a Tuition (with free limit validation), My Created Tuitions (full CRUD: edit, delete, toggle active/closed), and Manage Applicants (accept/reject).
-- **Admin Dashboard:** Overview stats (Total Users, Tutors, Students, Live Tuitions, Stripe Revenue), User Management (role switching), Tuition Moderation (approve/reject), and Stripe Transactions history.
-- **Shared Update Profile:** Name, phone, bio, and profile picture upload for all authenticated users.
-
-### 7. Custom UX & UI Polish
-- Custom loading spinner loader (`loading.tsx`).
-- Custom 404 page (`not-found.tsx`) and error boundary (`error.tsx`).
-- Rich toast notifications with `sonner`.
-- Clean pastel design system with cohesive color contrast (Dark `#0A0E09`, Pink `#FBE4E3`, Lime `#ECFAB5`, Lavender `#ECEEFE`, Sky `#D9F0FF`, Green `#96EE60`, Mint `#7FD09F`).
-
----
-
-## 🛠️ Tech Stack & NPM Packages Used
-
-### Client
-- **Framework:** Next.js 16 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS v4
-- **Icons:** Lucide React (`lucide-react`)
-- **Authentication:** BetterAuth React Client (`better-auth`)
-- **Notifications:** Sonner (`sonner`)
-- **Forms & Validation:** React Hook Form (`react-hook-form`), Zod (`zod`), Hookform Resolvers (`@hookform/resolvers`)
-- **HTTP Client:** Native Fetch & Axios (`axios`)
-
-### Server
-- **Runtime:** Node.js & Express.js
-- **Database:** MongoDB Atlas (Native driver)
-- **Auth & JWT:** BetterAuth with MongoDB adapter, JSONWebToken (`jsonwebtoken`)
-- **Payments:** Stripe SDK (`stripe`)
-- **CORS & Environment:** `cors`, `dotenv`
-- **Hosting:** Vercel Serverless
-
----
-
-## 💻 Local Setup Instructions
-
-### Client Setup
 ```bash
-cd mentorlagbe-client
+git clone https://github.com/imakashdey/mentorlagbe-server.git
+cd mentorlagbe-server
 npm install
 ```
 
-Create a `.env.local` file:
+Create a `.env` file:
+
 ```env
-NEXT_PUBLIC_API_URL=https://mentorlagbe-server-taupe.vercel.app
-NEXT_PUBLIC_IMGBB_API_KEY=8c8430b200b39ad34b223d6a62a74c77
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+BETTER_AUTH_SECRET=your_random_secret
+BETTER_AUTH_URL=http://localhost:5000
+JWT_SECRET=your_random_secret
+CLIENT_URL=http://localhost:3000
+STRIPE_SECRET_KEY=your_stripe_secret_key
 ```
 
-Start the development server:
+Start the server:
+
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Deployment
+
+Deployed on Vercel. Set the same environment variables in the Vercel project, with `CLIENT_URL=https://mentorlagbe-client-livid.vercel.app` (no trailing slash).
