@@ -8,7 +8,7 @@ export const API_URL =
 export const authClient = createAuthClient({
   baseURL:
     typeof window !== "undefined"
-      ? window.location.origin
+      ? (window.location.hostname.includes("localhost") ? API_URL : window.location.origin)
       : API_URL,
   fetchOptions: {
     credentials: "include",
