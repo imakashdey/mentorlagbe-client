@@ -11,6 +11,7 @@ import {
   Search,
   ExternalLink,
   X,
+  UploadCloud,
 } from "lucide-react";
 import {
   getMyTuitions,
@@ -20,6 +21,7 @@ import {
 } from "@/lib/api";
 import { Tuition } from "@/types";
 import { toast } from "sonner";
+import { uploadToImgBB } from "@/lib/imgbb";
 import Pagination from "@/components/pagination";
 
 export default function MyTuitionsPage() {
@@ -42,6 +44,7 @@ export default function MyTuitionsPage() {
     bannerImage: "",
   });
   const [savingEdit, setSavingEdit] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
 
   const fetchTuitions = () => {
     setLoading(true);
@@ -103,6 +106,26 @@ export default function MyTuitionsPage() {
       description: t.description || "",
       bannerImage: t.bannerImage || "",
     });
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload a valid image file");
+      return;
+    }
+    setUploadingBanner(true);
+    try {
+      const url = await uploadToImgBB(file);
+      setEditForm((prev) => ({ ...prev, bannerImage: url }));
+      toast.success("Banner uploaded!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload image");
+    } finally {
+      setUploadingBanner(false);
+      e.target.value = "";
+    }
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
@@ -445,17 +468,49 @@ export default function MyTuitionsPage() {
                 />
               </div>
 
+              {/* Banner Image: upload + preview + URL */}
               <div>
                 <label className="mb-1 block font-bold text-[#0A0E09]">
-                  Banner Image URL
+                  Banner Image
                 </label>
+
+                {editForm.bannerImage && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={editForm.bannerImage}
+                    alt="Banner preview"
+                    className="mb-2 h-32 w-full rounded-xl border border-gray-200 object-cover"
+                  />
+                )}
+
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#0A0E09]/20 bg-gray-50/50 px-4 py-3 font-bold text-[#0A0E09] transition hover:border-[#0A0E09]">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBannerUpload}
+                    className="sr-only"
+                  />
+                  {uploadingBanner ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin text-[#96EE60]" />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud size={15} />
+                      <span>Choose Banner Photo (JPG, PNG)</span>
+                    </>
+                  )}
+                </label>
+
                 <input
                   type="url"
+                  placeholder="Or paste a direct image URL"
                   value={editForm.bannerImage}
                   onChange={(e) =>
                     setEditForm({ ...editForm, bannerImage: e.target.value })
                   }
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-700 outline-none focus:border-[#0A0E09]"
+                  className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-gray-700 outline-none focus:border-[#0A0E09]"
                 />
               </div>
 
@@ -484,7 +539,7 @@ export default function MyTuitionsPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={savingEdit}
+                  disabled={savingEdit || uploadingBanner}
                   className="inline-flex items-center gap-1.5 rounded-full bg-[#96EE60] px-6 py-2.5 font-black text-[#0A0E09] hover:brightness-95 disabled:opacity-50"
                 >
                   {savingEdit && <Loader2 size={13} className="animate-spin" />}
