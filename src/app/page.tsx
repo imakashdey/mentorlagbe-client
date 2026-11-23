@@ -176,6 +176,8 @@ export default function HomePage() {
 
       {/* Stats: real numbers from database */}
       <StatsSection />
+     <Testimonials />
+
 
       {/* Pricing: white/pastel Free, green Pro */}
       <section className="bg-white py-20">
@@ -244,7 +246,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials & Community Feedback (Extra Section 2 & Optional 5) */}
-      <Testimonials />
+
     </>
   );
 }
